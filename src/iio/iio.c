@@ -2,24 +2,7 @@
  * Author: Brendan Le Foll <brendan.le.foll@intel.com>
  * Copyright (c) 2015 Intel Corporation.
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * SPDX-License-Identifier: MIT
  */
 
 #include "iio.h"
@@ -131,7 +114,6 @@ mraa_iio_get_channel_data(mraa_iio_context dev)
                     read(fd, readbuf, 31 * sizeof(char));
                     ret = sscanf(readbuf, "%ce:%c%u/%u>>%u", &shortbuf, &signchar, &chan->bits_used,
                                  &padint, &chan->shift);
-                    chan->bytes = padint / 8;
                     // probably should be 5?
                     if (ret < 0) {
                         // cleanup
@@ -139,6 +121,7 @@ mraa_iio_get_channel_data(mraa_iio_context dev)
                         close(fd);
                         return MRAA_IO_SETUP_FAILURE;
                     }
+                    chan->bytes = padint / 8;
                     chan->signedd = (signchar == 's');
                     chan->lendian = (shortbuf == 'l');
                     if (chan->bits_used == 64) {
@@ -172,10 +155,17 @@ mraa_iio_get_channel_data(mraa_iio_context dev)
     }
     closedir(dir);
 
-    // channel location has to be done in channel index order so do it afetr we
+    // channel location has to be done in channel index order so do it after we
     // have grabbed all the correct info
     for (i = 0; i < dev->chan_num; i++) {
-	chan = &dev->channels[i];
+        chan = &dev->channels[i];
+
+        if(chan->bytes <= 0)
+        {
+            syslog(LOG_ERR, "iio: Channel %d with channel bytes value <= 0");
+            return MRAA_IO_SETUP_FAILURE;
+        }
+
         if (curr_bytes % chan->bytes == 0) {
             chan->location = curr_bytes;
         } else {

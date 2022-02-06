@@ -1,3 +1,10 @@
+/*
+ * Author: David Antler <david.a.antler@intel.com>
+ * Copyright (c) 2016 Intel Corporation.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
 module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   // Project configuration.

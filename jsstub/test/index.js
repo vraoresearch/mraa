@@ -1,3 +1,10 @@
+/*
+ * Author: David Antler <david.a.antler@intel.com>
+ * Copyright (c) 2016 Intel Corporation.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
 var expect = require('expect.js');
 var m = require('../index');
 var LightBulb = require('./lightbulb');

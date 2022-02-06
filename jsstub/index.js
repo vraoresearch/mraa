@@ -1,4 +1,10 @@
-/**
+/*
+ * Author: David Antler <david.a.antler@intel.com>
+ * Copyright (c) 2016 Intel Corporation.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ *
  * @fileoverview This file implements a fake mraa stub which enables testing
  * as well as the ability to run on Windows.
  */

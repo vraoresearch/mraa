@@ -3,24 +3,7 @@
  * Author: Michael Ring <mail@michael-ring.org>
  * Copyright (c) 2014 Intel Corporation.
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <glob.h>
@@ -370,6 +353,7 @@ mraa_beaglebone()
 {
     unsigned int emmc_enabled = 1;
     unsigned int hdmi_enabled = 1;
+    unsigned int pcm0_enabled = 1;
     unsigned int i2c0_enabled = 1;
     unsigned int i2c1_enabled = 1;
     unsigned int spi0_enabled = 0;
@@ -408,6 +392,11 @@ mraa_beaglebone()
         hdmi_enabled = 1;
     else
         hdmi_enabled = 0;
+
+    if (mraa_file_exist("/sys/class/sound/pcmC0D0p"))
+        pcm0_enabled = 1;
+    else
+        pcm0_enabled = 0;
 
     if (mraa_file_exist("/sys/class/i2c-dev/i2c-0"))
         i2c0_enabled = 1;
@@ -1256,7 +1245,7 @@ mraa_beaglebone()
     b->pins[BUILD_PIN(P9, 27)].gpio.parent_id = 0;
     b->pins[BUILD_PIN(P9, 27)].gpio.mux_total = 0;
 
-    if (emmc_enabled != 1) {
+    if (pcm0_enabled != 1) {
         if (spi1_enabled == 1) {
             strncpy(b->pins[BUILD_PIN(P9, 28)].name, "SPI1CS0", MRAA_PIN_NAME_SIZE);
             b->pins[BUILD_PIN(P9, 28)].capabilities =
@@ -1275,7 +1264,7 @@ mraa_beaglebone()
     b->pins[BUILD_PIN(P9, 28)].gpio.mux_total = 0;
     b->pins[BUILD_PIN(P9, 28)].spi.mux_total = 0;
 
-    if (emmc_enabled != 1) {
+    if (pcm0_enabled != 1) {
         if (spi1_enabled == 1) {
             strncpy(b->pins[BUILD_PIN(P9, 29)].name, "SPI1D0", MRAA_PIN_NAME_SIZE);
             b->pins[BUILD_PIN(P9, 29)].capabilities =
@@ -1294,7 +1283,7 @@ mraa_beaglebone()
     b->pins[BUILD_PIN(P9, 29)].gpio.mux_total = 0;
     b->pins[BUILD_PIN(P9, 29)].spi.mux_total = 0;
 
-    if (emmc_enabled != 1) {
+    if (pcm0_enabled != 1) {
         if (spi1_enabled == 1) {
             strncpy(b->pins[BUILD_PIN(P9, 30)].name, "SPI1D1", MRAA_PIN_NAME_SIZE);
             b->pins[BUILD_PIN(P9, 30)].capabilities =
@@ -1313,7 +1302,7 @@ mraa_beaglebone()
     b->pins[BUILD_PIN(P9, 30)].gpio.mux_total = 0;
     b->pins[BUILD_PIN(P9, 30)].spi.mux_total = 0;
 
-    if (emmc_enabled != 1) {
+    if (pcm0_enabled != 1) {
         if (spi1_enabled == 1) {
             strncpy(b->pins[BUILD_PIN(P9, 31)].name, "SPI1CLK", MRAA_PIN_NAME_SIZE);
             b->pins[BUILD_PIN(P9, 31)].capabilities =

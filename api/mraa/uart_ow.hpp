@@ -20,14 +20,16 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once
 
-#include "uart_ow.h"
 #include "types.hpp"
-#include <stdexcept>
+#include "uart_ow.h"
 #include <cstring>
+#include <stdexcept>
 
 namespace mraa
 {
@@ -75,11 +77,38 @@ class UartOW
     }
 
     /**
+     * UartOW Constructor, takes a pointer to the UartOW context and initialises
+     * the UartOW class
+     *
+     * @param uart_ow_context void * to a UartOW context
+     */
+    UartOW(void* uart_ow_context)
+    {
+        m_uart = (mraa_uart_ow_context) uart_ow_context;
+
+        if (m_uart == NULL) {
+            throw std::invalid_argument("Invalid UART_OW context");
+        }
+    }
+
+    /**
      * Uart destructor
      */
     ~UartOW()
     {
+        if (m_uart != NULL) {
+            mraa_uart_ow_stop(m_uart);
+        }
+    }
+
+    /*
+     * Closes UartOW explicitly, prior to implicit closing on object destruction
+     */
+    void
+    close()
+    {
         mraa_uart_ow_stop(m_uart);
+        m_uart = NULL;
     }
 
     /**

@@ -30,6 +30,7 @@ set (mraa_LIB_SRCS_NOAUTO
   ${PROJECT_SOURCE_DIR}/src/aio/aio.c
   ${PROJECT_SOURCE_DIR}/src/uart/uart.c
   ${PROJECT_SOURCE_DIR}/src/led/led.c
+  ${PROJECT_SOURCE_DIR}/src/initio/initio.c
   ${mraa_LIB_SRCS_NOAUTO}
 )
 
@@ -50,10 +51,13 @@ set (mraa_LIB_X86_SRCS_NOAUTO
   ${PROJECT_SOURCE_DIR}/src/x86/intel_minnow_byt_compatible.c
   ${PROJECT_SOURCE_DIR}/src/x86/intel_sofia_3gr.c
   ${PROJECT_SOURCE_DIR}/src/x86/intel_cherryhills.c
+  ${PROJECT_SOURCE_DIR}/src/x86/intel_ilk.c
   ${PROJECT_SOURCE_DIR}/src/x86/up.c
   ${PROJECT_SOURCE_DIR}/src/x86/up2.c
   ${PROJECT_SOURCE_DIR}/src/x86/intel_joule_expansion.c
   ${PROJECT_SOURCE_DIR}/src/x86/iei_tank.c
+  ${PROJECT_SOURCE_DIR}/src/x86/adlink-ipi.c
+  ${PROJECT_SOURCE_DIR}/src/x86/up_xtreme.c
 )
 
 message (STATUS "INFO - Adding support for platform ${MRAAPLATFORMFORCE}")
@@ -85,6 +89,8 @@ if (NOT ${MRAAPLATFORMFORCE} STREQUAL "ALL")
     set (mraa_LIB_X86_SRCS_NOAUTO ${PROJECT_SOURCE_DIR}/src/x86/x86.c ${PROJECT_SOURCE_DIR}/src/x86/intel_joule_expansion.c)
   elseif( ${MRAAPLATFORMFORCE} STREQUAL "MRAA_IEI_TANK")
     set (mraa_LIB_X86_SRCS_NOAUTO ${PROJECT_SOURCE_DIR}/src/x86/x86.c ${PROJECT_SOURCE_DIR}/src/x86/iei_tank.c)
+  elseif (${MRAAPLATFORMFORCE} STREQUAL "MRAA_UPXTREME")
+    set (mraa_LIB_X86_SRCS_NOAUTO ${PROJECT_SOURCE_DIR}/src/x86/x86.c ${PROJECT_SOURCE_DIR}/src/x86/up_xtreme.c)
   else ()
     message (FATAL_ERROR "Unknown x86 platform enabled!")
   endif ()
@@ -100,6 +106,8 @@ set (mraa_LIB_ARM_SRCS_NOAUTO
   ${PROJECT_SOURCE_DIR}/src/arm/phyboard.c
   ${PROJECT_SOURCE_DIR}/src/arm/banana.c
   ${PROJECT_SOURCE_DIR}/src/arm/de_nano_soc.c
+  ${PROJECT_SOURCE_DIR}/src/arm/rockpi4.c
+  ${PROJECT_SOURCE_DIR}/src/arm/adlink_ipi.c
 )
 
 set (mraa_LIB_MIPS_SRCS_NOAUTO
@@ -176,22 +184,26 @@ endif()
 
 if (USBPLAT)
   message (STATUS "INFO - Adding USB platforms")
+  # USBPLAT is used in mraa.c to decide whether to attempt to load sub-platforms
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSBPLAT=1")
+  # Loading an FTDI platform extender library using dlopen requires
+  # mraa to link against libdl.  Mraa does NOT link directly to the
+  # FT4222 shim library.
+  set (mraa_LIBS ${mraa_LIBS} dl)
   if (FTDID2xx)
     find_package (Ftd2xx)
     if (${LIBFTD2XX_FOUND})
-      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFTDID2XX=1")
       set (mraa_LIBS ${mraa_LIBS} ${LIBFTD2XX_LIBRARIES})
     else ()
       message (SEND_ERROR "Enabled FTDID2xx support but library not found")
     endif ()
   endif ()
+  # The FTDI4222 shim includes libft4222.h (which includes ftd2xx.h), make sure
+  # both exist if building the FTDI4222 shim library
   if (FTDI4222)
+    find_package (Ftd2xx REQUIRED)
     find_package (Ftd4222)
-    if (${LIBFT4222_FOUND})
-      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFTDI4222=1")
-      set (mraa_LIBS ${mraa_LIBS} dl)
-    else ()
+    if (NOT ${LIBFT4222_FOUND})
       message (SEND_ERROR "Enabled FTDI4222 support but library not found")
     endif ()
   endif ()

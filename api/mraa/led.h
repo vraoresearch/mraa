@@ -20,6 +20,8 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once
@@ -47,15 +49,23 @@ extern "C" {
 typedef struct _led* mraa_led_context;
 
 /**
+ * Initialise led_context, based on led index.
+ *
+ *  @param led ID of the LED
+ *  @returns LED context or NULL
+ */
+mraa_led_context mraa_led_init(int led);
+
+/**
  * Initialise led_context, based on led function name.
  * The structure of LED entry in sysfs is "devicename:colour:function"
  * This api expects only one unique LED identifier which would be
- * "function" name most often. For instance, `mraa_led_init("user4");`
+ * "function" name most often. For instance, `mraa_led_init_raw("user4");`
  *
- *  @param led Name of the LED
+ *  @param led_dev Name of the LED device
  *  @returns LED context or NULL
  */
-mraa_led_context mraa_led_init(const char* led);
+mraa_led_context mraa_led_init_raw(const char* led_dev);
 
 /**
  * Set LED brightness

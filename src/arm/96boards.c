@@ -5,24 +5,7 @@
  *
  * Copied from src/arm/banana.c
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <mraa/common.h>
@@ -36,15 +19,24 @@
 
 #define DT_BASE "/proc/device-tree"
 
+#define PLATFORM_NAME_BBGUM "BBGUM"
 #define PLATFORM_NAME_DB410C "DB410C"
 #define PLATFORM_NAME_DB820C "DB820C"
 #define PLATFORM_NAME_HIKEY "HIKEY"
 #define PLATFORM_NAME_HIKEY960 "HIKEY960"
-#define PLATFORM_NAME_BBGUM "BBGUM"
+#define PLATFORM_NAME_ROCK960 "ROCK960"
+#define PLATFORM_NAME_ULTRA96 "ULTRA96"
+
 #define MAX_SIZE 64
 #define MMAP_PATH "/dev/mem"
 #define DB410C_MMAP_REG 0x01000000
 
+// Bubblegum-96
+int bbgum_ls_gpio_pins[MRAA_96BOARDS_LS_GPIO_COUNT] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 155, 154 };
+
+const char* bbgum_serialdev[MRAA_96BOARDS_LS_UART_COUNT] = { "/dev/ttyS3", "/dev/ttyS5" };
+
+// Dragonboard410c
 int db410c_ls_gpio_pins[MRAA_96BOARDS_LS_GPIO_COUNT] = {
     36, 12, 13, 69, 115, 4, 24, 25, 35, 34, 28, 33,
 };
@@ -55,18 +47,22 @@ int db410c_chardev_map[MRAA_96BOARDS_LS_GPIO_COUNT][2] = {
 };
 
 const char* db410c_serialdev[MRAA_96BOARDS_LS_UART_COUNT] = { "/dev/ttyMSM0", "/dev/ttyMSM1" };
+const char* db410c_led[MRAA_96BOARDS_LED_COUNT] = { "user1", "user2", "user3",
+                                                    "user4", "bt", "wlan" };
 
+// Dragonboard820c
 int db820c_ls_gpio_pins[MRAA_96BOARDS_LS_GPIO_COUNT] = {
     80, 29, 124, 24, 62, 507, 10, 8, 25, 26, 23, 133,
 };
 
 int db820c_chardev_map[MRAA_96BOARDS_LS_GPIO_COUNT][2] = {
     { 0, 80 }, { 0, 29 }, { 0, 125 }, { 0, 24 }, { 0, 62 }, { 1, 4 },
-    { 0, 10 }, { 0, 8 }, { 0, 25 }, { 0, 26 }, { 0, 23 },  { 0, 133 },
+    { 0, 10 }, { 0, 8 },  { 0, 25 },  { 0, 26 }, { 0, 23 }, { 0, 133 },
 };
 
 const char* db820c_serialdev[MRAA_96BOARDS_LS_UART_COUNT] = { "/dev/ttyMSM0", "/dev/ttyMSM1" };
 
+// HiKey
 int hikey_ls_gpio_pins[MRAA_96BOARDS_LS_GPIO_COUNT] = {
     488, 489, 490, 491, 492, 415, 463, 495, 426, 433, 427, 434,
 };
@@ -78,17 +74,32 @@ int hikey_chardev_map[MRAA_96BOARDS_LS_GPIO_COUNT][2] = {
 
 const char* hikey_serialdev[MRAA_96BOARDS_LS_UART_COUNT] = { "/dev/ttyAMA2", "/dev/ttyAMA3" };
 
-// HIKEY960
+// HiKey960
 int hikey960_chardev_map[MRAA_96BOARDS_LS_GPIO_COUNT][2] = {
-    { 26, 0 }, { 26, 1 }, { 26, 2 },  { 26, 3 }, { 26, 4 },  { 22, 6 },
-    { 2, 7 }, { 5, 0 }, { 6, 4 }, { 2, 3 }, { 9, 3 }, { 2, 5 },
+    { 26, 0 }, { 26, 1 }, { 26, 2 }, { 26, 3 }, { 26, 4 }, { 22, 6 },
+    { 2, 7 },  { 5, 0 },  { 6, 4 },  { 2, 3 },  { 9, 3 },  { 2, 5 },
 };
 
 const char* hikey960_serialdev[MRAA_96BOARDS_LS_UART_COUNT] = { "/dev/ttyAMA3", "/dev/ttyAMA6" };
 
-int bbgum_ls_gpio_pins[MRAA_96BOARDS_LS_GPIO_COUNT] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 155, 154 };
+// Rock960
+int rock960_ls_gpio_pins[MRAA_96BOARDS_LS_GPIO_COUNT] = { 1006, 1002, 1041, 1042, 1121, 1128,
+                                                          1124, 1131, 1125, 1132, 1050, 1055 };
 
-const char* bbgum_serialdev[MRAA_96BOARDS_LS_UART_COUNT] = { "/dev/ttyS3", "/dev/ttyS5" };
+int rock960_chardev_map[MRAA_96BOARDS_LS_GPIO_COUNT][2] = {
+    { 0, 6 },  { 0, 2 }, { 1, 9 },  { 1, 10 }, { 3, 25 }, { 4, 0 },
+    { 3, 28 }, { 4, 3 }, { 3, 29 }, { 4, 4 },  { 1, 18 }, { 1, 23 },
+};
+
+const char* rock960_serialdev[MRAA_96BOARDS_LS_UART_COUNT] = { "/dev/ttyS3", "/dev/ttyS4" };
+
+// Ultra96
+int ultra96_chardev_map[MRAA_96BOARDS_LS_GPIO_COUNT][2] = {
+    { 0, 36 }, { 0, 37 }, { 0, 39 }, { 0, 40 }, { 0, 44 }, { 0, 45 },
+    { 0, 78 }, { 0, 79 }, { 0, 80 }, { 0, 81 }, { 0, 82 }, { 0, 83 },
+};
+
+const char* ultra96_serialdev[MRAA_96BOARDS_LS_UART_COUNT] = { "/dev/ttyPS0", "/dev/ttyS0" };
 
 // MMAP
 static uint8_t* mmap_reg = NULL;
@@ -235,12 +246,25 @@ mraa_96boards()
 
     if (mraa_file_exist(DT_BASE "/model")) {
         // We are on a modern kernel, great!!!!
-        if (mraa_file_contains(DT_BASE "/model", "Qualcomm Technologies, Inc. APQ 8016 SBC")) {
+        if (mraa_file_contains(DT_BASE "/model", "s900")) {
+            b->platform_name = PLATFORM_NAME_BBGUM;
+            ls_gpio_pins = bbgum_ls_gpio_pins;
+            b->uart_dev[0].device_path = (char*) bbgum_serialdev[0];
+            b->uart_dev[1].device_path = (char*) bbgum_serialdev[1];
+        } else if (mraa_file_contains(DT_BASE "/model",
+                                      "Qualcomm Technologies, Inc. APQ 8016 SBC")) {
             b->platform_name = PLATFORM_NAME_DB410C;
             ls_gpio_pins = db410c_ls_gpio_pins;
             chardev_map = &db410c_chardev_map;
             b->uart_dev[0].device_path = (char*) db410c_serialdev[0];
             b->uart_dev[1].device_path = (char*) db410c_serialdev[1];
+            b->led_dev[0].name = (char*) db410c_led[0];
+            b->led_dev[1].name = (char*) db410c_led[1];
+            b->led_dev[2].name = (char*) db410c_led[2];
+            b->led_dev[3].name = (char*) db410c_led[3];
+            b->led_dev[4].name = (char*) db410c_led[4];
+            b->led_dev[5].name = (char*) db410c_led[5];
+            b->led_dev_count = MRAA_96BOARDS_LED_COUNT;
             b->adv_func->gpio_mmap_setup = &mraa_db410c_mmap_setup;
             b->chardev_capable = 1;
         } else if (mraa_file_contains(DT_BASE "/model", "Qualcomm Technologies, Inc. DB820c")) {
@@ -248,7 +272,7 @@ mraa_96boards()
             ls_gpio_pins = db820c_ls_gpio_pins;
             chardev_map = &db820c_chardev_map;
             b->uart_dev[0].device_path = (char*) db820c_serialdev[0];
-            b->uart_dev[1].device_path = (char *)db820c_serialdev[1];
+            b->uart_dev[1].device_path = (char*) db820c_serialdev[1];
             b->chardev_capable = 1;
         } else if (mraa_file_contains(DT_BASE "/model", "HiKey Development Board")) {
             b->platform_name = PLATFORM_NAME_HIKEY;
@@ -263,11 +287,20 @@ mraa_96boards()
             b->uart_dev[0].device_path = (char*) hikey960_serialdev[0];
             b->uart_dev[1].device_path = (char*) hikey960_serialdev[1];
             b->chardev_capable = 1;
-        } else if (mraa_file_contains(DT_BASE "/model", "s900")) {
-            b->platform_name = PLATFORM_NAME_BBGUM;
-            ls_gpio_pins = bbgum_ls_gpio_pins;
-            b->uart_dev[0].device_path = (char*) bbgum_serialdev[0];
-            b->uart_dev[1].device_path = (char*) bbgum_serialdev[1];
+        } else if (mraa_file_contains(DT_BASE "/model", "ROCK960")) {
+            b->platform_name = PLATFORM_NAME_ROCK960;
+            ls_gpio_pins = rock960_ls_gpio_pins;
+            chardev_map = &rock960_chardev_map;
+            b->uart_dev[0].device_path = (char*) rock960_serialdev[0];
+            b->uart_dev[1].device_path = (char*) rock960_serialdev[1];
+            b->chardev_capable = 1;
+        } else if ((mraa_file_contains(DT_BASE "/model", "ZynqMP ZCU100 RevC")) ||
+                   (mraa_file_contains(DT_BASE "/model", "Avnet Ultra96 Rev1"))) {
+            b->platform_name = PLATFORM_NAME_ULTRA96;
+            chardev_map = &ultra96_chardev_map;
+            b->uart_dev[0].device_path = (char*) ultra96_serialdev[0];
+            b->uart_dev[1].device_path = (char*) ultra96_serialdev[1];
+            b->chardev_capable = 1;
         }
     }
 
@@ -281,6 +314,16 @@ mraa_96boards()
         b->def_i2c_bus = 0;
         b->i2c_bus[0].bus_id = 1;
         b->i2c_bus[1].bus_id = 2;
+    } else if (strncmp(b->platform_name, PLATFORM_NAME_ROCK960, MAX_SIZE) == 0) {
+        b->i2c_bus_count = MRAA_96BOARDS_LS_I2C_COUNT;
+        b->def_i2c_bus = 0;
+        b->i2c_bus[0].bus_id = 6;
+        b->i2c_bus[1].bus_id = 1;
+    } else if (strncmp(b->platform_name, PLATFORM_NAME_ULTRA96, MAX_SIZE) == 0) {
+        b->i2c_bus_count = MRAA_96BOARDS_LS_I2C_COUNT;
+        b->def_i2c_bus = 0;
+        b->i2c_bus[0].bus_id = 2;
+        b->i2c_bus[1].bus_id = 3;
     } else {
         b->i2c_bus_count = MRAA_96BOARDS_LS_I2C_COUNT;
         b->def_i2c_bus = 0;
@@ -312,7 +355,14 @@ mraa_96boards()
     mraa_96boards_pininfo(b, 9, -1, 0, "UART0_RTS");
     mraa_96boards_pininfo(b, 10, -1, 0, "SPI0_DIN");
     mraa_96boards_pininfo(b, 11, -1, 0, "UART1_TXD");
-    mraa_96boards_pininfo(b, 12, -1, 0, "SPI0_CS");
+    // On DB410c, configure the SPI0_CS pin as GPIO for enabling the
+    // user to control it manually without adding chip select property
+    // in Devicetree.
+    if (strncmp(b->platform_name, PLATFORM_NAME_DB410C, MAX_SIZE) == 0) {
+        mraa_96boards_pininfo(b, 12, 18, 1, "SPI0_CS", -1, 0, 18);
+    } else {
+        mraa_96boards_pininfo(b, 12, -1, 0, "SPI0_CS");
+    }
     mraa_96boards_pininfo(b, 13, -1, 0, "UART1_RXD");
     mraa_96boards_pininfo(b, 14, -1, 0, "SPI0_DOUT");
     mraa_96boards_pininfo(b, 15, -1, 0, "I2C0_SCL");
@@ -336,7 +386,12 @@ mraa_96boards()
     mraa_96boards_pininfo(b, 39, -1, 0, "GND");
     mraa_96boards_pininfo(b, 40, -1, 0, "GND");
 
-    b->gpio_count = MRAA_96BOARDS_LS_GPIO_COUNT;
+    // On DB410c, SPI0_CS pin is used as GPIO
+    if (strncmp(b->platform_name, PLATFORM_NAME_DB410C, MAX_SIZE) == 0) {
+        b->gpio_count = MRAA_96BOARDS_LS_GPIO_COUNT + 1;
+    } else {
+        b->gpio_count = MRAA_96BOARDS_LS_GPIO_COUNT;
+    }
 
     b->aio_count = 0;
     b->adc_raw = 0;

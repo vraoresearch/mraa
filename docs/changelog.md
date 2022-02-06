@@ -5,6 +5,31 @@ This changelog is meant as a quick & rough guide to what has changed between
 versions. The API is now fairly stable but when new calls/features are added
 they are listed here. Anything pre 0.2.x is ignored.
 
+**2.2.0**
+  * Multiple fixes to improve project security and reliability on newly added platforms
+  * Removed Python 2 bindings and old node.js versions from CI
+  * Added detection for latest RPi board versions
+  * Fix for SPI frequency function not writing to file
+  * Common mraa API can now return C error strings from MRAA error codes
+  * Updated and extended installation instructions for some Linux distributions
+
+**2.1.0**
+  * New platforms UP Xtreme, IPi SMARC, ROCK PI 4, Raspberry Pi 4, Ultra96
+  * Added support for chardev GPIO devices on Rock960
+  * Introduced APIs to initialize GPIOs by name
+  * Multiple fixes to address static tool scans and user submitted bug reports
+  * Revised documentation to reflect project transfer to the Eclipse Foundation
+  * Updated installation instructions for multiple distribution channels
+
+**2.0.0**
+  * New platforms IEI Tank, Ultra-96, Rock960, Hikey960, Dragonboard 820c
+  * Added support for chardev GPIO devices with implementation on several boards
+  * Added string based I/O initialization for simpler integration with other frameworks
+  * Added GTest support for unit testing
+  * Extended named LED device APIs allowing them to be listed during board definition
+  * Removed packaging and CI for obsolete devkits
+  * Multiple bug fixes and cmake improvements
+
 **1.9.0**
   * Added support for RPi Zero W
   * Added support for MIPS based Omega2 and Linkit Smart 7688

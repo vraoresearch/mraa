@@ -1,7 +1,13 @@
-/**
-* @fileoverview Implementation of a LightBulb class abstraction
-*
-*/
+/*
+ * Author: David Antler <david.a.antler@intel.com>
+ * Copyright (c) 2016 Intel Corporation.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ *
+ * @fileoverview Implementation of a LightBulb class abstraction
+ *
+ */
 
 module.exports = (function() {
     "use strict";

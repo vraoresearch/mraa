@@ -3,24 +3,7 @@
  * Author: Brendan Le Foll <brendan.le.foll@intel.com>
  * Copyright (c) 2014-2016 Intel Corporation.
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * SPDX-License-Identifier: MIT
  */
 
 #pragma once
@@ -46,7 +29,7 @@
 #define MAX_AIO_COUNT 7
 #define MAX_UART_COUNT 6
 #define MAX_PWM_COUNT 6
-
+#define MAX_LED_COUNT 12
 
 // general status failures for internal functions
 #define MRAA_PLATFORM_NO_INIT -3
@@ -86,12 +69,14 @@
 #define BUS_KEY "bus"
 
 // IO keys
-#define GPIO_KEY "GPIO"
-#define SPI_KEY "SPI"
-#define UART_KEY "UART"
-#define I2C_KEY "I2C"
-#define PWM_KEY "PWM"
-#define AIO_KEY "AIO"
+#define AIO_KEY "a"
+#define GPIO_KEY "g"
+#define I2C_KEY "i"
+#define IIO_KEY "ii"
+#define PWM_KEY "p"
+#define SPI_KEY "s"
+#define UART_KEY "u"
+#define UART_OW_KEY "ow"
 
 #define MRAA_JSONPLAT_ENV_VAR "MRAA_JSON_PLATFORM"
 
@@ -171,6 +156,11 @@ struct _gpio {
         k < dev->num_chips && (group = &dev->gpio_group[k]); \
         ++k) \
             if (dev->gpio_group[k].is_required)
+
+#define for_each_gpio_chip(cinfo, cinfos, num_chips) \
+    for (int idx = 0; \
+        idx < num_chips && (cinfo = cinfos[idx]); \
+        (idx++))
 
 /**
  * A structure representing a I2C bus
@@ -283,8 +273,7 @@ struct _iio {
 struct _led {
     /*@{*/
     int count; /**< total LED count in a platform */
-    char *led_name; /**< LED name */
-    char led_path[64]; /**< sysfs path of the LED */
+    const char *led_path; /**< sysfs path of the LED */
     int trig_fd; /**< trigger file descriptor */
     int bright_fd; /**< brightness file descriptor */
     int max_bright_fd; /**< maximum brightness file descriptor */
@@ -453,6 +442,16 @@ typedef struct {
 } mraa_aio_dev_t;
 
 /**
+ * Structure representing an LED device.
+ */
+typedef struct {
+    /*@{*/
+    char *name; /**< LED device function name */
+    unsigned int index; /**< Index as exposed in the platform */
+    /*@}*/
+} mraa_led_dev_t;
+
+/**
  * A Structure representing a platform/board.
  */
 typedef struct _board_t {
@@ -488,6 +487,8 @@ typedef struct _board_t {
     mraa_adv_func_t* adv_func;    /**< Pointer to advanced function disptach table */
     struct _board_t* sub_platform;     /**< Pointer to sub platform */
     mraa_boolean_t chardev_capable;  /**< Decide what interface is being used: old sysfs or new char device*/
+    mraa_led_dev_t led_dev[MAX_LED_COUNT]; /**< Array of LED devices */
+    unsigned int led_dev_count; /**< Total onboard LED device count */
     /*@}*/
 } mraa_board_t;
 
@@ -497,3 +498,15 @@ typedef struct {
     uint8_t iio_device_count; /**< IIO device count */
 } mraa_iio_info_t;
 #endif
+
+/**
+ * Function pointer typedef for use with platform extender libraries.
+ * Currently only the FT42222.
+ *
+ * @param board Pointer to valid board structure.  If a mraa_board_t
+ * is initialized, it will be added to board->sub_platform
+ *
+ * @return MRAA_SUCCESS if a valid subplaform has been initialized,
+ * otherwise return MRAA_ERROR_PLATFORM_NOT_INITIALISED
+ */
+typedef mraa_result_t (*fptr_add_platform_extender)(mraa_board_t* board);
