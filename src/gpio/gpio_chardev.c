@@ -12,6 +12,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <poll.h>
 #include <pthread.h>
 #include <signal.h>
@@ -244,6 +245,43 @@ mraa_get_chip_info_by_number(unsigned number)
     return cinfo;
 }
 
+int
+mraa_get_chip_base_by_number(unsigned number)
+{
+#if defined(PERIPHERALMAN)
+    return -1;
+#else
+    char* glob;
+    char* path;
+    FILE* fh;
+    int res;
+
+    glob = malloc(PATH_MAX);
+    if (!glob) {
+        syslog(LOG_ERR, "[GPIOD_INTERFACE]: malloc() fail");
+        return -1;
+    }
+
+    snprintf(glob, PATH_MAX, "/sys/bus/gpio/devices/gpiochip%d/../gpio/*/base", number);
+
+    path = mraa_file_unglob(glob);
+    free(glob);
+    if (!path) {
+        syslog(LOG_ERR, "[GPIOD_INTERFACE]: invalid chip number");
+        res = -1;
+    } else {
+        fh = fopen(path, "r");
+        if (!fh || fscanf(fh, "%d", &res) != 1) {
+            syslog(LOG_ERR, "[GPIOD_INTERFACE]: could not read from %s", path);
+            res = -1;
+        }
+    }
+
+    free(path);
+    return res;
+#endif
+}
+
 mraa_gpiod_line_info*
 mraa_get_line_info_from_descriptor(int chip_fd, unsigned line_number)
 {
@@ -431,6 +469,8 @@ mraa_get_chip_infos(mraa_gpiod_chip_info*** cinfos)
         return -1;
     }
 
+    *cinfos = cinfo;
+
     /* Get chip info for all gpiochips present in the platform */
     for (i = 0; i < num_chips; i++) {
         cinfo[i] = mraa_get_chip_info_by_name(dirs[i]->d_name);
@@ -440,7 +480,49 @@ mraa_get_chip_infos(mraa_gpiod_chip_info*** cinfos)
         }
     }
 
-    *cinfos = cinfo;
-
     return num_chips;
+}
+
+#ifndef GPIO_MAX_NAME_SIZE
+#define GPIO_MAX_NAME_SIZE 32
+#endif
+
+int
+mraa_find_gpio_line_by_name(const char *name, unsigned *chip_number, unsigned *line_number)
+{
+    mraa_gpiod_chip_info **cinfos;
+    mraa_gpiod_chip_info *cinfo;
+    mraa_gpiod_line_info *linfo;
+    int num_chips, i;
+
+    num_chips = mraa_get_chip_infos(&cinfos);
+    if (num_chips < 0) {
+        return -1;
+    }
+
+    for_each_gpio_chip(cinfo, cinfos, num_chips) {
+        for (i = 0; i < cinfo->chip_info.lines; i++) {
+            linfo = mraa_get_line_info_by_chip_name(cinfo->chip_info.name, i);
+
+            if (!strncmp(linfo->name, name, GPIO_MAX_NAME_SIZE)) {
+                if (chip_number) {
+                    /* idx is coming from `for_each_gpio_chip` definition */
+                    *chip_number = idx;
+                }
+
+                if (line_number) {
+                    *line_number = linfo->line_offset;
+                }
+
+                free(linfo);
+                free(cinfos);
+                return 0;
+            }
+
+            free(linfo);
+        }
+    }
+
+    free(cinfos);
+    return -1;
 }

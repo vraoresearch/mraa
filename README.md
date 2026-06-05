@@ -1,23 +1,21 @@
 <p align="center">
-  <img src="http://iotdk.intel.com/misc/logos/mraa.png" height="150px" width="auto" algt="Mraa Logo"/>
+  <img src="http://iotdk.intel.com/misc/logos/mraa.png" height="150px" width="auto" algt="MRAA Logo"/>
 </p>
 
-Eclipse Mraa - Low Level I/O Communications Library for GNU/Linux platforms
+Eclipse MRAA™ - Low Level I/O Communications Library for GNU/Linux Platforms
 ===========================================================================
 
-Eclipse Mraa (Libmraa) is a C/C++ library with bindings to Java, Python and JavaScript
+Eclipse MRAA (Libmraa) is a C/C++ library with bindings to Java, Python and JavaScript
 to interface with the I/O pins and buses on various IoT and Edge platforms, with a
 structured and sane API where port names/numbering match the board that you are on.
-Use of libmraa does not tie you to specific hardware. Since board detection done at
+Use of libmraa does not tie you to specific hardware. Since board detection is done at
 runtime you can create portable code that will work across the supported platforms.
 
 The intent is to make it easier for developers and sensor manufacturers to map
 their sensors & actuators on top of supported hardware and to allow control of
 low level communication protocol by high level languages & constructs.
 
-The MRAA project is an Eclipse IoT project. A detailed project description can be found [here](https://projects.eclipse.org/proposals/eclipse-mraa).
-
-[![Build Status](https://travis-ci.org/intel-iot-devkit/mraa.svg?branch=master)](https://travis-ci.org/intel-iot-devkit/mraa) [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=mraa-master&metric=alert_status)](https://sonarcloud.io/dashboard?id=mraa-master)
+The MRAA project is an Eclipse IoT project. A detailed project description can be found [here](https://projects.eclipse.org/projects/iot.mraa).
 
 Supported Boards
 ================
@@ -45,7 +43,17 @@ ARM
 * [phyBOARD-Wega](../master/docs/phyboard-wega.md)
 * [96Boards](../master/docs/96boards.md)
 * [ADLINK IPi-SMARC ARM](../master/docs/adlink_ipi_arm.md)
+* [Radxa CM3](../master/docs/radxa_cm3.md)
+* [Radxa CM5 IO](../master/docs/radxa_cm5_io.md)
+* [Radxa E25](../master/docs/radxa_e25.md)
+* [Radxa ROCK 3A](../master/docs/radxa_rock_3a.md)
+* [Radxa ROCK 3B](../master/docs/radxa_rock_3b.md)
+* [Radxa ROCK 3C](../master/docs/radxa_rock_3c.md)
+* [Radxa ROCK 5A](../master/docs/radxa_rock_5a.md)
+* [Radxa ROCK 5B](../master/docs/radxa_rock_5b.md)
+* [Radxa ZERO3](../master/docs/radxa_zero3.md)
 * [Rock Pi 4](../master/docs/rockpi4.md)
+* [Orange Pi Prime](../master/docs/orange_pi_prime.md)
 
 MIPS
 ---
@@ -73,7 +81,11 @@ JSON platform
 ----
 * [Platform loading](../master/docs/jsonplatform.md)
 
-Installing on your board
+RISC-V
+----
+* [VisionFive](../master/docs/visionfive.md)
+
+Installing on Your Board
 ========================
 
 Installing on Ubuntu
@@ -94,7 +106,7 @@ Running MRAA tools or applications on Ubuntu systems requires elevated permissio
 Install on Arch Linux
 ---------------------
 
-There is an AUR package for mraa here: https://aur.archlinux.org/packages/mraa
+There is an AUR package for MRAA here: https://aur.archlinux.org/packages/mraa
 
 Install on openSUSE or SLE
 ---------------------------
@@ -120,22 +132,11 @@ sudo zypper in mraa
 A full list of packages and instructions for installing MRAA for various openSUSE releases
 can be found [here](https://software.opensuse.org/package/mraa).
 
-Install on Fedora Linux
------------------------
-
-There is an mraa package in the main Fedora repository so it can be dnf installed
-in all recent Fedora releases. The Node.js and Python 3 bindings are packaged as
-separate packages.
-
-```bash
-sudo dnf install mraa nodejs-mraa python3-mraa
-```
-
-Installing for Red Hat Enterprise Linux, CentOS and Other Linux Distributions
+Installing on Other Linux Distributions
 ---------------------------
 
-The MRAA project does not currently distribute official binaries for RHEL
-or CentOS so developers will have to compile the project from sources as
+The MRAA project does not currently distribute official binaries for other distributions
+so developers will have to compile the project from sources as
 described in the next section.
 
 For testing and development purposes it may be possible to share and install
@@ -161,6 +162,10 @@ glance at our [debugging](../master/docs/debugging.md) page too.
 
 API Documentation
 =================
+
+**UNDER CONSTRUCTION:** we are working on re-hosting our documentation, so below
+links don't work. Please use the sources and Markdown files under [docs](docs/)
+in the meanwhile.
 
 <a href="http://c.mraa.io"><img src="http://iotdk.intel.com/misc/logos/c++.png"/></a>
 <a href="http://java.mraa.io"><img src="http://iotdk.intel.com/misc/logos/java.png"/></a>

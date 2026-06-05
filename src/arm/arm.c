@@ -10,6 +10,14 @@
 #include <string.h>
 
 #include "arm/96boards.h"
+#include "arm/radxa_cm3.h"
+#include "arm/radxa_e25.h"
+#include "arm/radxa_rock_3a.h"
+#include "arm/radxa_rock_3b.h"
+#include "arm/radxa_rock_3c.h"
+#include "arm/radxa_rock_5a.h"
+#include "arm/radxa_rock_5b.h"
+#include "arm/radxa_cm5_io.h"
 #include "arm/rockpi4.h"
 #include "arm/de_nano_soc.h"
 #include "arm/banana.h"
@@ -17,6 +25,8 @@
 #include "arm/phyboard.h"
 #include "arm/raspberry_pi.h"
 #include "arm/adlink_ipi.h"
+#include "arm/siemens/iot2050.h"
+#include "arm/orange_pi_prime.h"
 #include "mraa_internal.h"
 
 
@@ -90,14 +100,38 @@ mraa_arm_platform()
             platform_type = MRAA_96BOARDS;
         else if (mraa_file_contains("/proc/device-tree/model", "Avnet Ultra96 Rev1"))
             platform_type = MRAA_96BOARDS;
+        else if (mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_CM3_IO) ||
+                 mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_CM3_IO_2) ||
+                 mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_CM3_RPI_CM4_IO))
+            platform_type = MRAA_RADXA_CM3;
+        else if (mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_E25))
+            platform_type = MRAA_RADXA_E25;
+        else if (mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_ROCK_3A))
+            platform_type = MRAA_RADXA_ROCK_3A;
+        else if (mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_ROCK_3B))
+            platform_type = MRAA_RADXA_ROCK_3B;
+        else if (mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_ROCK_3C) ||
+                 mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_ZERO3))
+            platform_type = MRAA_RADXA_ROCK_3C;
+        else if (mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_ROCK_5A))
+            platform_type = MRAA_RADXA_ROCK_5A;
+        else if (mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_ROCK_5B))
+            platform_type = MRAA_RADXA_ROCK_5B;
+        else if (mraa_file_contains("/proc/device-tree/model", PLATFORM_NAME_RADXA_CM5_IO))
+            platform_type = MRAA_RADXA_CM5_IO;
         else if (mraa_file_contains("/proc/device-tree/model", "ROCK Pi 4") ||
-                 mraa_file_contains("/proc/device-tree/model", "ROCK PI 4")
+                 mraa_file_contains("/proc/device-tree/model", "ROCK PI 4") ||
+                 mraa_file_contains("/proc/device-tree/model", "ROCK 4")
                  )
             platform_type = MRAA_ROCKPI4;
         else if (mraa_file_contains("/proc/device-tree/compatible", "raspberrypi,"))
             platform_type = MRAA_RASPBERRY_PI;
         else if (mraa_file_contains("/proc/device-tree/model", "ADLINK ARM, LEC-PX30"))
             platform_type = MRAA_ADLINK_IPI;
+        else if (mraa_file_contains("/proc/device-tree/model", "SIMATIC IOT2050"))
+            platform_type = MRAA_SIEMENS_IOT2050;
+        else if (mraa_file_contains("/proc/device-tree/model", "Xunlong Orange Pi Prime"))
+            platform_type = MRAA_ORANGE_PI_PRIME;
     }
 
     switch (platform_type) {
@@ -116,6 +150,30 @@ mraa_arm_platform()
         case MRAA_96BOARDS:
             plat = mraa_96boards();
             break;
+        case MRAA_RADXA_CM3:
+            plat = mraa_radxa_cm3();
+            break;
+        case MRAA_RADXA_E25:
+            plat = mraa_radxa_e25();
+            break;
+        case MRAA_RADXA_ROCK_3A:
+            plat = mraa_radxa_rock_3a();
+            break;
+        case MRAA_RADXA_ROCK_3B:
+            plat = mraa_radxa_rock_3b();
+            break;
+        case MRAA_RADXA_ROCK_3C:
+            plat = mraa_radxa_rock_3c();
+            break;
+        case MRAA_RADXA_ROCK_5A:
+            plat = mraa_radxa_rock_5a();
+            break;
+        case MRAA_RADXA_ROCK_5B:
+            plat = mraa_radxa_rock_5b();
+            break;
+        case MRAA_RADXA_CM5_IO:
+            plat = mraa_radxa_cm5_io();
+            break;
         case MRAA_ROCKPI4:
             plat = mraa_rockpi4();
             break;
@@ -124,6 +182,11 @@ mraa_arm_platform()
             break;
         case MRAA_ADLINK_IPI:
             plat = mraa_adlink_ipi();
+        case MRAA_SIEMENS_IOT2050:
+            plat = mraa_siemens_iot2050();
+            break;
+        case MRAA_ORANGE_PI_PRIME:
+            plat = mraa_orange_pi_prime();
             break;
         default:
             plat = NULL;

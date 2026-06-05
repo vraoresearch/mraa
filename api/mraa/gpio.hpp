@@ -186,7 +186,11 @@ class Gpio
         v8::Local<v8::Value> argv[] = { SWIGV8_INTEGER_NEW(-1) };
 #if NODE_MODULE_VERSION >= 0x000D
         v8::Local<v8::Function> f = v8::Local<v8::Function>::New(v8::Isolate::GetCurrent(), This->m_v8isr);
+#if (V8_MAJOR_VERSION-0) < 4
         f->Call(SWIGV8_CURRENT_CONTEXT()->Global(), argc, argv);
+#else
+        f->Call(SWIGV8_CURRENT_CONTEXT(), SWIGV8_CURRENT_CONTEXT()->Global(), argc, argv);
+#endif
 #else
         This->m_v8isr->Call(SWIGV8_CURRENT_CONTEXT()->Global(), argc, argv);
 #endif
@@ -327,7 +331,7 @@ class Gpio
     Result
     useMmap(bool enable)
     {
-        return (Result) mraa_gpio_use_mmaped(m_gpio, (mraa_boolean_t) enable);
+        return (Result) mraa_gpio_use_mmaped_internal(m_gpio, (mraa_boolean_t) enable);
     }
     /**
      * Get pin number of Gpio. If raw param is True will return the

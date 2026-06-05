@@ -22,6 +22,7 @@
 */
 #define PLATFORM_NAME_ROCK_PI4 "ROCK Pi 4"
 #define PLATFORM_NAME_ROCK_PI4_2 "ROCK PI 4"
+#define PLATFORM_NAME_ROCK_PI4_3 "ROCK 4"
 #define MAX_SIZE 64
 
 const char* rockpi4_serialdev[MRAA_ROCKPI4_UART_COUNT] = { "/dev/ttyS2", "/dev/ttyS4" };
@@ -38,9 +39,8 @@ mraa_rockpi4_pininfo(mraa_board_t* board, int index, int sysfs_pin, mraa_pincapa
     vsnprintf(pininfo->name, MRAA_PIN_NAME_SIZE, fmt, arg_ptr);
 
     if( pincapabilities_t.gpio == 1 ) {
-        va_arg(arg_ptr, int);
-        pininfo->gpio.gpio_chip = va_arg(arg_ptr, int);
-        pininfo->gpio.gpio_line = va_arg(arg_ptr, int);
+        pininfo->gpio.gpio_chip = sysfs_pin / 32;
+        pininfo->gpio.gpio_line = sysfs_pin % 32;
     }
 
     pininfo->capabilities = pincapabilities_t;
@@ -71,7 +71,8 @@ mraa_rockpi4()
     if (mraa_file_exist(DT_BASE "/model")) {
         // We are on a modern kernel, great!!!!
         if (mraa_file_contains(DT_BASE "/model", PLATFORM_NAME_ROCK_PI4)  ||
-            mraa_file_contains(DT_BASE "/model", PLATFORM_NAME_ROCK_PI4_2)
+            mraa_file_contains(DT_BASE "/model", PLATFORM_NAME_ROCK_PI4_2) ||
+            mraa_file_contains(DT_BASE "/model", PLATFORM_NAME_ROCK_PI4_3)
             ) {
             b->platform_name = PLATFORM_NAME_ROCK_PI4;
             b->uart_dev[0].device_path = (char*) rockpi4_serialdev[0];
@@ -97,8 +98,8 @@ mraa_rockpi4()
     // SPI
     b->spi_bus_count = MRAA_ROCKPI4_SPI_COUNT;
     b->def_spi_bus = 0;
-    b->spi_bus[0].bus_id = 32766;
-    b->spi_bus[1].bus_id = 32765;
+    b->spi_bus[0].bus_id = 1;
+    b->spi_bus[1].bus_id = 2;
 
     b->pwm_dev_count = MRAA_ROCKPI4_PWM_COUNT;
     b->pwm_default_period = 500;
@@ -124,6 +125,7 @@ mraa_rockpi4()
     b->adc_supported = 10;
     b->aio_dev[0].pin = 26;
     b->aio_non_seq = 1;
+    b->chardev_capable = 1;
 
     mraa_rockpi4_pininfo(b, 0,   -1, (mraa_pincapabilities_t){0,0,0,0,0,0,0,0}, "INVALID");
     mraa_rockpi4_pininfo(b, 1,   -1, (mraa_pincapabilities_t){1,0,0,0,0,0,0,0}, "3V3");

@@ -309,7 +309,12 @@ mraa_gpio_init(int pin)
             return NULL;
         }
     }
-
+    if (board->adv_func->mux_init_reg) {
+        if(board->adv_func->mux_init_reg(pin, MUX_REGISTER_MODE_GPIO) != MRAA_SUCCESS) {
+            syslog(LOG_ERR, "gpio%i: init: unable to setup multiplex register", pin);
+            return NULL;
+        }
+    }
     mraa_gpio_context r = mraa_gpio_init_internal(board->adv_func, board->pins[pin].gpio.pinmap);
 
     if (r == NULL) {
@@ -408,6 +413,13 @@ mraa_gpio_chardev_init(int pins[], int num_pins)
             }
         }
 
+        if (board->adv_func->mux_init_reg) {
+            if(board->adv_func->mux_init_reg(pins[i], MUX_REGISTER_MODE_GPIO) != MRAA_SUCCESS) {
+                syslog(LOG_ERR, "[GPIOD_INTERFACE]: init: unable to setup mux register for pin %d", pins[i]);
+                mraa_gpio_close(dev);
+                return NULL;
+            }
+        }
         chip_id = board->pins[pins[i]].gpio.gpio_chip;
         line_offset = board->pins[pins[i]].gpio.gpio_line;
 
@@ -1740,7 +1752,7 @@ mraa_gpio_owner(mraa_gpio_context dev, mraa_boolean_t own)
 }
 
 mraa_result_t
-mraa_gpio_use_mmaped(mraa_gpio_context dev, mraa_boolean_t mmap_en)
+mraa_gpio_use_mmaped_internal(mraa_gpio_context dev, mraa_boolean_t mmap_en)
 {
     if (dev == NULL) {
         syslog(LOG_ERR, "gpio: use_mmaped: context is invalid");
@@ -1754,6 +1766,12 @@ mraa_gpio_use_mmaped(mraa_gpio_context dev, mraa_boolean_t mmap_en)
     syslog(LOG_ERR, "gpio%i: use_mmaped: mmap not implemented on this platform", dev->pin);
 
     return MRAA_ERROR_FEATURE_NOT_IMPLEMENTED;
+}
+
+mraa_result_t
+mraa_gpio_use_mmaped(mraa_gpio_context dev, mraa_boolean_t mmap_en)
+{
+    return mraa_gpio_use_mmaped_internal(dev, mmap_en);
 }
 
 int
